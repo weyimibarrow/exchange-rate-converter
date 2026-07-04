@@ -28,17 +28,21 @@ def convert_currencies(amount_to_convert, from_currency, to_currency):
     
 
 # gathering user input for the currency conversion
-while True:
-    try:
-        amount_to_convert = float(input("Enter the amount you want to convert here: "))
-        from_currency = input("Select the currency you want to convert from: ")
-        to_currency = input("Select the currency you want to convert to: ")
-        result = convert_currencies(amount_to_convert, from_currency, to_currency)
-        break
-    except ValueError:
-        print("Invalid input. Please enter a valid number e.g (1, 2, 100, 30.5, etc).")
+# This block only runs when main.py is executed directly (the CLI).
+# When main.py is imported (e.g. by app.py), it is skipped so the
+# converter logic above can be reused without asking for input.
+if __name__ == "__main__":
+    while True:
+        try:
+            amount_to_convert = float(input("Enter the amount you want to convert here: "))
+            from_currency = input("Select the currency you want to convert from: ")
+            to_currency = input("Select the currency you want to convert to: ")
+            result = convert_currencies(amount_to_convert, from_currency, to_currency)
+            break
+        except ValueError:
+            print("Invalid input. Please enter a valid number e.g (1, 2, 100, 30.5, etc).")
 
-if result is None:
-    print("Sorry! You've entered an invalid currency code or amount. Please check your input and try again.")
-else:
-    print(f"The result is {result:.2f} {to_currency}.")
+    if result is None:
+        print("Sorry! You've entered an invalid currency code or amount. Please check your input and try again.")
+    else:
+        print(f"The result is {result:.2f} {to_currency}.")
