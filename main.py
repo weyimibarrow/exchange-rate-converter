@@ -28,14 +28,15 @@ def convert_currencies(amount_to_convert, from_currency, to_currency):
     
 
 # gathering user input for the currency conversion
-try:
-    amount_to_convert = float(input("Enter the amount you want to convert here: "))
-    from_currency = input("Select the currency you want to convert from: ")
-    to_currency = input("Select the currency you want to convert to: ")
-    result = convert_currencies(amount_to_convert, from_currency, to_currency)
-except ValueError:
-    print("Invalid input. Please enter a valid number e.g (1, 2, 100, 30.5, etc).")
-    exit()
+while True:
+    try:
+        amount_to_convert = float(input("Enter the amount you want to convert here: "))
+        from_currency = input("Select the currency you want to convert from: ")
+        to_currency = input("Select the currency you want to convert to: ")
+        result = convert_currencies(amount_to_convert, from_currency, to_currency)
+        break
+    except ValueError:
+        print("Invalid input. Please enter a valid number e.g (1, 2, 100, 30.5, etc).")
 
 if result is None:
     print("Sorry! You've entered an invalid currency code or amount. Please check your input and try again.")
