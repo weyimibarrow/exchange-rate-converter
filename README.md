@@ -1,4 +1,4 @@
-# # Convrrrt, the EXCHANGE RATE CONVERTER
+#Convrrrt, the EXCHANGE RATE CONVERTER
 
 Convrrrt (aka ineedtochangemymoneyrightthehellnow.com) is a command line (for now) exchange rate converter that can convert to and from 40+ currencies. 
 
