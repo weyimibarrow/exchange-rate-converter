@@ -1,7 +1,13 @@
 import requests
-response = requests.get("https://open.er-api.com/v6/latest/USD")
-print(f"Status: {response.status_code}")
-data = response.json()
+try:
+    response = requests.get("https://open.er-api.com/v6/latest/USD")
+    if response.status_code != 200:
+        print("Oh no! Something's gone wrong. Please try again later.")
+        exit()
+    data = response.json()
+except requests.exceptions.ConnectionError:
+    print("Error: We're not able to connect to the exchange rates server right now. Try again later, thank you!")
+    exit()
 
 raw_rates = data["rates"]
 inverted_rates = {}
@@ -13,11 +19,25 @@ EXCHANGE_RATES = inverted_rates
 
 
 def convert_currencies(amount_to_convert, from_currency, to_currency):
-    amount_in_usd = amount_to_convert * EXCHANGE_RATES[from_currency]
-    converted_amount = amount_in_usd / EXCHANGE_RATES[to_currency]
-    return converted_amount
+    try:
+        amount_in_usd = amount_to_convert * EXCHANGE_RATES[from_currency]
+        converted_amount = amount_in_usd / EXCHANGE_RATES[to_currency]
+        return converted_amount
+    except KeyError as e:
+        return None
+    
 
-example_1 = convert_currencies(50, "EUR", "AUD")
-example_2 = convert_currencies(200, "UGX", "USD")
-print(example_1)
-print(example_2)
+# gathering user input for the currency conversion
+try:
+    amount_to_convert = float(input("Enter the amount you want to convert here: "))
+    from_currency = input("Select the currency you want to convert from: ")
+    to_currency = input("Select the currency you want to convert to: ")
+    result = convert_currencies(amount_to_convert, from_currency, to_currency)
+except ValueError:
+    print("Invalid input. Please enter a valid number e.g (1, 2, 100, 30.5, etc).")
+    exit()
+
+if result is None:
+    print("Sorry! You've entered an invalid currency code or amount. Please check your input and try again.")
+else:
+    print(f"The result is {result:.2f} {to_currency}.")
