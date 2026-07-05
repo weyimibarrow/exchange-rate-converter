@@ -55,20 +55,25 @@
                 required
             >
 
+            <!-- Each dropdown option carries TWO separate things:
+                   value="{{ code }}"  -> the 3-letter code the form SUBMITS
+                   {{ label }}         -> the text the user SEES, "CODE (Full Name)"
+                 Only the code is sent to the server, so convert_currencies still
+                 receives the plain code (e.g. "USD"). -->
             <label for="from_currency">From</label>
             <select id="from_currency" name="from_currency">
-                {% for code in currencies %}
+                {% for code, label in currencies %}
                 <option value="{{ code }}" {% if code == form.from_currency %}selected{% endif %}>
-                    {{ code }}
+                    {{ label }}
                 </option>
                 {% endfor %}
             </select>
 
             <label for="to_currency">To</label>
             <select id="to_currency" name="to_currency">
-                {% for code in currencies %}
+                {% for code, label in currencies %}
                 <option value="{{ code }}" {% if code == form.to_currency %}selected{% endif %}>
-                    {{ code }}
+                    {{ label }}
                 </option>
                 {% endfor %}
             </select>

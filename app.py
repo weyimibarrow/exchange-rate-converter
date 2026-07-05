@@ -19,11 +19,26 @@ from flask import Flask, render_template, request
 # is guarded by `if __name__ == "__main__":` in main.py, so it is skipped here.
 from main import EXCHANGE_RATES, convert_currencies
 
+# Full currency names for nicer dropdown labels (e.g. "United States Dollar").
+# This is optional/cosmetic: if the file is missing for any reason we fall back
+# to an empty map, and every label then just shows the bare code.
+try:
+    from currency_names import CURRENCY_NAMES
+except ImportError:
+    CURRENCY_NAMES = {}
+
 app = Flask(__name__)
 
-# Sorted list of valid currency codes, used to fill both dropdowns so the
-# user can only ever pick a currency that actually exists in EXCHANGE_RATES.
-CURRENCIES = sorted(EXCHANGE_RATES.keys())
+# Build the list that fills BOTH dropdowns. Each entry is a (code, label) pair:
+#   - code  -> the value the form submits (what convert_currencies looks up)
+#   - label -> the text the user sees, "CODE (Full Name)"
+# If a code has no matching full name, the label falls back to just the code,
+# so a missing name can never crash the page.
+CURRENCIES = []
+for code in sorted(EXCHANGE_RATES.keys()):
+    name = CURRENCY_NAMES.get(code)
+    label = f"{code} ({name})" if name else code
+    CURRENCIES.append((code, label))
 
 
 @app.route("/", methods=["GET", "POST"])
