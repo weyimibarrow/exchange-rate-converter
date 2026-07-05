@@ -12,6 +12,8 @@ The web page just collects user input, hands it to convert_currencies(),
 and shows the result (or a friendly error) back on the page.
 """
 
+import os
+
 from flask import Flask, render_template, request
 
 # Reuse the existing converter. Importing main.py runs its top-level code,
@@ -81,4 +83,10 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Debug mode is OFF by default and only turns on when you explicitly opt in.
+    # This matters because Flask's debugger exposes an interactive console that
+    # can run code on the server, so it must never be on in production.
+    #   Local dev:   FLASK_DEBUG=1 python app.py
+    #   Production:   leave FLASK_DEBUG unset (and prefer a real server, e.g. gunicorn)
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    app.run(debug=debug)
