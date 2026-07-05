@@ -24,17 +24,18 @@
 
     <main class="card">
         <!-- Curved title: the word is bent along an invisible arc using SVG <textPath>. -->
-        <svg class="title" viewBox="0 0 400 120" role="img" aria-label="Convrrt">
+        <svg class="title" viewBox="0 0 400 150" role="img" aria-label="Convrrt">
             <defs>
                 <!-- The invisible line the text sits on. It is a shallow arc:
-                       M 30,100   -> start at the lower-left  (x=30,  y=100)
-                       Q 200,20   -> ONE control point high in the middle
-                                     (x=200, y=20) which "pulls" the line upward there
-                         370,100  -> end at the lower-right (x=370, y=100, same height as start)
+                       M 15,120   -> start at the lower-left  (x=15,  y=120)
+                       Q 200,30   -> ONE control point high in the middle
+                                     (x=200, y=30) which "pulls" the line upward there
+                         385,120  -> end at the lower-right (x=385, y=120, same height as start)
                      Q draws a quadratic curve: it bows toward the control point,
                      so a control point near the top gives a gentle rainbow/smile arc.
-                     (Move the control point's y DOWN, e.g. Q 200,110, to flip it into a frown.) -->
-                <path id="titleArc" d="M 30,100 Q 200,20 370,100" fill="transparent" />
+                     (Move the control point's y DOWN, e.g. Q 200,140, to flip it into a frown.)
+                     The path is nice and wide so the enlarged title fits along it. -->
+                <path id="titleArc" d="M 15,120 Q 200,30 385,120" fill="transparent" />
             </defs>
             <text text-anchor="middle">
                 <!-- startOffset 50% + text-anchor="middle" centre the word on the arc. -->

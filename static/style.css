@@ -103,9 +103,9 @@ body {
 .title {
     display: block;
     width: 100%;
-    max-width: 340px;
+    max-width: 420px;      /* render the whole SVG wider = bigger focal point */
     height: auto;
-    margin: 0 auto 4px;
+    margin: 0 auto 6px;
     overflow: visible;     /* let the tall italic letters show fully */
 }
 
@@ -114,7 +114,7 @@ body {
     font-family: "IBM Plex Sans", Arial, sans-serif;
     font-style: italic;                            /* italic, per the design */
     font-weight: 700;                              /* bold */
-    font-size: 54px;                               /* large (in SVG user units) */
+    font-size: 88px;                               /* much larger (in SVG user units) */
     letter-spacing: 0.5px;
 }
 
