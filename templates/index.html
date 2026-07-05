@@ -3,12 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Currency Converter</title>
+    <title>Convrrt — Currency Converter</title>
+
+    <!-- Load IBM Plex Sans from Google Fonts.
+         We ask for the weights/styles we actually use:
+         400 (regular), 400 italic (for the title), and 700 (bold). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Decorative background layer. It is filled with scattered numbers and
+         currency symbols by the small script at the bottom of this file.
+         aria-hidden keeps it out of the way of screen readers. -->
+    <div id="bg" class="bg-layer" aria-hidden="true"></div>
+
     <main class="card">
-        <h1>Currency Converter</h1>
+        <h1 class="title">Convrrt</h1>
+        <p class="tagline">Convert money between 40+ currencies from across the world!</p>
 
         <form method="post" action="/">
             <label for="amount">Amount</label>
@@ -50,5 +66,38 @@
         <p class="error">{{ error }}</p>
         {% endif %}
     </main>
+
+    <!-- Build the scattered background.
+         This is purely decorative, so it lives here in a tiny script rather
+         than being hand-typed as dozens of HTML tags. It does NOT touch the
+         form or any backend logic. -->
+    <script>
+        (function () {
+            // The pool of characters we scatter: digits 0-9 plus currency symbols.
+            var chars = "0123456789".split("")
+                .concat(["£", "$", "€", "₦", "₩", "₹", "¥", "¢", "₽", "₺", "฿", "₫"]);
+
+            var layer = document.getElementById("bg");
+            var count = 70; // how many characters to sprinkle across the screen
+
+            for (var i = 0; i < count; i++) {
+                var span = document.createElement("span");
+                span.className = "bg-char";
+                // Pick a random character from the pool.
+                span.textContent = chars[Math.floor(Math.random() * chars.length)];
+
+                // Random position anywhere in the viewport.
+                span.style.left = (Math.random() * 100) + "vw";
+                span.style.top = (Math.random() * 100) + "vh";
+
+                // Random size (30px–120px) and rotation (-45deg to +45deg)
+                // so the layout looks hand-scattered and overlaps a little.
+                span.style.fontSize = (30 + Math.random() * 90) + "px";
+                span.style.transform = "rotate(" + (Math.random() * 90 - 45) + "deg)";
+
+                layer.appendChild(span);
+            }
+        })();
+    </script>
 </body>
 </html>

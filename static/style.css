@@ -1,33 +1,121 @@
+/* =========================================================================
+   Convrrt — currency converter styles
+   Organised top-to-bottom:
+     1. Base / page
+     2. Scattered background layer
+     3. The frosted-glass card
+     4. Typography inside the card (title + tagline)
+     5. The form (inputs, dropdowns, button)
+     6. Result / error messages
+   ========================================================================= */
+
+
+/* ---- 1. Base / page ---------------------------------------------------- */
+
 * {
     box-sizing: border-box;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: #f4f6f8;
-    color: #222;
+    /* IBM Plex Sans is used for ALL UI text (title, tagline, labels, fields).
+       Google Fonts is loaded in index.html; these are safe fallbacks. */
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+
     margin: 0;
     min-height: 100vh;
+
+    /* Centre the card in the middle of the screen. */
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+
+    /* Light mint-green backdrop that the black characters sit on. */
+    background: #b9f0c0;
 }
+
+
+/* ---- 2. Scattered background layer ------------------------------------- */
+
+/* This layer sits behind everything, pinned to the viewport, and holds the
+   randomly-placed numbers and currency symbols created by the script. */
+.bg-layer {
+    position: fixed;
+    inset: 0;              /* top/right/bottom/left = 0, so it fills the screen */
+    overflow: hidden;      /* hide any characters that spill off the edges */
+    z-index: 0;            /* keep it underneath the card (which is z-index 1) */
+    background: #b9f0c0;   /* same mint as the body */
+}
+
+/* Each scattered character. Position/size/rotation are set inline by the
+   script; here we only set the shared look. */
+.bg-char {
+    position: absolute;
+    color: #000;           /* solid black numbers/symbols */
+    font-weight: 700;      /* bold, as requested */
+
+    /* Helvetica Now is a commercial font (not on Google Fonts). If it isn't
+       installed on the machine, we fall back to Helvetica/Arial, which look
+       very close for big bold characters. */
+    font-family: "Helvetica Now", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    line-height: 1;
+    user-select: none;     /* decorative, so don't let it be selected/copied */
+}
+
+
+/* ---- 3. The frosted-glass card ---------------------------------------- */
 
 .card {
-    background: #fff;
+    position: relative;
+    z-index: 1;            /* sit above the background layer */
+
     width: 100%;
-    max-width: 400px;
-    padding: 32px;
-    border-radius: 10px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    max-width: 440px;
+    padding: 36px;
     text-align: center;
+
+    /* Warm near-black at ~78% opacity. Because it is semi-transparent, the
+       background shows through it slightly. */
+    background: rgba(38, 32, 30, 0.78);
+    color: #fff;
+
+    /* THE FROSTED-GLASS EFFECT:
+       backdrop-filter blurs whatever is *behind* the element (our scattered
+       numbers), so they turn soft and dreamy instead of sharp and busy.
+       The -webkit- line is the same thing for Safari. */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    /* Rounded corners + a subtle shadow so the card looks like it floats. */
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+
+    /* A faint light border adds to the "pane of glass" feel. */
+    border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-h1 {
-    margin-top: 0;
-    font-size: 1.5rem;
+
+/* ---- 4. Typography inside the card ------------------------------------ */
+
+.title {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 700;
+    font-style: italic;    /* the title is italic, per the design */
+    color: #fff;
+    letter-spacing: 0.5px;
 }
+
+.tagline {
+    margin: 6px 0 24px;
+    font-weight: 400;                     /* regular weight */
+    color: rgba(255, 255, 255, 0.75);     /* lighter than the title */
+    font-size: 1rem;
+}
+
+
+/* ---- 5. The form ------------------------------------------------------- */
 
 form {
     text-align: left;
@@ -36,49 +124,70 @@ form {
 }
 
 label {
-    margin-top: 14px;
-    margin-bottom: 4px;
-    font-weight: 600;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    font-weight: 400;                     /* regular */
     font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
 }
 
+/* Clean white fields with comfortable padding and rounded corners. */
 input,
 select {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    font-weight: 400;
     font-size: 1rem;
+    padding: 12px 14px;
+    border: none;
+    border-radius: 10px;
+    background: #fff;
+    color: #222;
 }
 
+/* A soft focus ring so keyboard users can see the active field. */
+input:focus,
+select:focus {
+    outline: 2px solid #3fae6b;
+    outline-offset: 1px;
+}
+
+/* Convert button — a green call-to-action that pops against the dark card. */
 button {
-    margin-top: 20px;
-    padding: 12px;
-    background: #2b6cb0;
+    margin-top: 24px;
+    padding: 14px;
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
     color: #fff;
+    background: #3fae6b;
     border: none;
-    border-radius: 6px;
-    font-size: 1rem;
+    border-radius: 10px;
     cursor: pointer;
+    transition: background 0.15s ease;
 }
 
 button:hover {
-    background: #245a94;
+    background: #349159;
 }
 
+
+/* ---- 6. Result / error messages -------------------------------------- */
+
 .result {
-    margin-top: 20px;
-    padding: 12px;
-    background: #e6fffa;
-    border: 1px solid #38b2ac;
-    border-radius: 6px;
-    font-weight: 600;
+    margin-top: 22px;
+    padding: 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    background: rgba(63, 174, 107, 0.20);
+    border: 1px solid rgba(63, 174, 107, 0.6);
+    color: #d7ffe6;
 }
 
 .error {
-    margin-top: 20px;
-    padding: 12px;
-    background: #fff5f5;
-    border: 1px solid #e53e3e;
-    border-radius: 6px;
-    color: #c53030;
+    margin-top: 22px;
+    padding: 14px;
+    border-radius: 10px;
+    background: rgba(229, 62, 62, 0.18);
+    border: 1px solid rgba(229, 62, 62, 0.6);
+    color: #ffd7d7;
 }
