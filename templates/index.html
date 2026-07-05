@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convrrt — Currency Converter</title>
+
+    <!-- Load IBM Plex Sans from Google Fonts.
+         We ask for the weights/styles we actually use:
+         400 (regular), 400 italic (for the title), and 700 (bold). -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Decorative background layer. It is filled with scattered numbers and
+         currency symbols by the small script at the bottom of this file.
+         aria-hidden keeps it out of the way of screen readers. -->
+    <div id="bg" class="bg-layer" aria-hidden="true"></div>
+
+    <main class="card">
+        <!-- Curved title: the word is bent along an invisible arc using SVG <textPath>. -->
+        <svg class="title" viewBox="0 0 400 150" role="img" aria-label="Convrrt">
+            <defs>
+                <!-- The invisible line the text sits on. It is a shallow arc:
+                       M 15,120   -> start at the lower-left  (x=15,  y=120)
+                       Q 200,30   -> ONE control point high in the middle
+                                     (x=200, y=30) which "pulls" the line upward there
+                         385,120  -> end at the lower-right (x=385, y=120, same height as start)
+                     Q draws a quadratic curve: it bows toward the control point,
+                     so a control point near the top gives a gentle rainbow/smile arc.
+                     (Move the control point's y DOWN, e.g. Q 200,140, to flip it into a frown.)
+                     The path is nice and wide so the enlarged title fits along it. -->
+                <path id="titleArc" d="M 15,120 Q 200,30 385,120" fill="transparent" />
+            </defs>
+            <text text-anchor="middle">
+                <!-- startOffset 50% + text-anchor="middle" centre the word on the arc. -->
+                <textPath href="#titleArc" startOffset="50%">Convrrt</textPath>
+            </text>
+        </svg>
+        <p class="tagline">Convert money between 40+ currencies from across the world!</p>
+
+        <form method="post" action="/">
+            <label for="amount">Amount</label>
+            <input
+                type="text"
+                id="amount"
+                name="amount"
+                value="{{ form.amount }}"
+                placeholder="e.g. 100"
+                required
+            >
+
+            <!-- Each dropdown option carries TWO separate things:
+                   value="{{ code }}"  -> the 3-letter code the form SUBMITS
+                   {{ label }}         -> the text the user SEES, "CODE (Full Name)"
+                 Only the code is sent to the server, so convert_currencies still
+                 receives the plain code (e.g. "USD"). -->
+            <label for="from_currency">From</label>
+            <select id="from_currency" name="from_currency">
+                {% for code, label in currencies %}
+                <option value="{{ code }}" {% if code == form.from_currency %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label for="to_currency">To</label>
+            <select id="to_currency" name="to_currency">
+                {% for code, label in currencies %}
+                <option value="{{ code }}" {% if code == form.to_currency %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Convert</button>
+        </form>
+
+        {% if result %}
+        <p class="result">{{ result }}</p>
+        {% endif %}
+
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+    </main>
+
+    <!-- Build the scattered background AND make it "repel" from the mouse.
+         This is purely decorative, so it lives here in a tiny script rather
+         than being hand-typed as dozens of HTML tags. It does NOT touch the
+         form or any backend logic. -->
+    <script>
+        (function () {
+            // The pool of characters we scatter: digits 0-9 plus currency symbols.
+            var chars = "0123456789".split("")
+                .concat(["£", "$", "€", "₦", "₩", "₹", "¥", "¢", "฿", "₫", "₴", "₽", "₺", "₪"]);
+
+            var layer = document.getElementById("bg");
+
+            // Each entry describes one character:
+            //   el         -> the <span> on screen
+            //   baseX/baseY-> its resting position in pixels (never changes unless resized)
+            //   dx/dy      -> its CURRENT displacement from rest (animated every frame)
+            //   rotation   -> its fixed tilt in degrees
+            //   strength   -> how far this particular char can be pushed (adds variety)
+            var items = [];
+
+            // ---- Even, dense distribution using a "jittered grid" ----
+            // A pure Math.random() scatter clumps in some spots and leaves gaps.
+            // Instead we lay down a grid of cells and drop one character near the
+            // centre of each cell, nudged by a random "jitter". That guarantees
+            // full, even coverage while still looking hand-scattered.
+            function build() {
+                layer.innerHTML = "";
+                items = [];
+
+                var W = window.innerWidth;
+                var H = window.innerHeight;
+
+                // Aim for ~230 characters, and pick a column/row count that keeps
+                // the cells roughly square for the current screen shape.
+                var target = 230;
+                var cols = Math.max(1, Math.round(Math.sqrt(target * W / H)));
+                var rows = Math.max(1, Math.ceil(target / cols));
+                var cellW = W / cols;
+                var cellH = H / rows;
+
+                for (var r = 0; r < rows; r++) {
+                    for (var c = 0; c < cols; c++) {
+                        var span = document.createElement("span");
+                        span.className = "bg-char";
+                        span.textContent = chars[Math.floor(Math.random() * chars.length)];
+
+                        // Cell centre + up to ±40% jitter = even but not gridlike.
+                        var x = (c + 0.5) * cellW + (Math.random() - 0.5) * cellW * 0.8;
+                        var y = (r + 0.5) * cellH + (Math.random() - 0.5) * cellH * 0.8;
+
+                        span.style.left = x + "px";
+                        span.style.top = y + "px";
+                        span.style.fontSize = (26 + Math.random() * 96) + "px"; // varied sizes
+
+                        var rotation = Math.random() * 100 - 50;   // -50deg .. +50deg
+                        var strength = 45 + Math.random() * 45;    // per-char push distance
+
+                        // Start at rest: rotation only, no displacement.
+                        span.style.transform = "rotate(" + rotation + "deg)";
+
+                        layer.appendChild(span);
+                        items.push({
+                            el: span, baseX: x, baseY: y,
+                            dx: 0, dy: 0, rotation: rotation, strength: strength
+                        });
+                    }
+                }
+            }
+
+            build();
+
+            // Rebuild on resize so coverage always fills the viewport.
+            // Debounced so we don't rebuild on every single resize event.
+            var resizeTimer;
+            window.addEventListener("resize", function () {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(build, 200);
+            });
+
+            // ---- Mouse tracking ----
+            // Start the cursor "far away" so nothing is pushed until the mouse
+            // actually enters the page; reset it on mouseleave so everything
+            // eases back home.
+            var mouseX = -9999, mouseY = -9999;
+            window.addEventListener("mousemove", function (e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+            window.addEventListener("mouseleave", function () {
+                mouseX = -9999;
+                mouseY = -9999;
+            });
+
+            // ---- The animation loop (repel + spring-back) ----
+            var RADIUS = 180;   // how close (px) the mouse must be to affect a char
+            var EASE = 0.12;    // 0..1 : smaller = slower, softer, more "liquid"
+
+            function tick() {
+                for (var i = 0; i < items.length; i++) {
+                    var it = items[i];
+
+                    // Vector from the mouse to this char's RESTING spot.
+                    var vx = it.baseX - mouseX;
+                    var vy = it.baseY - mouseY;
+                    var dist = Math.sqrt(vx * vx + vy * vy);
+
+                    // Where we WANT this char to be relative to rest.
+                    // Default target is 0,0 (back home).
+                    var targetX = 0, targetY = 0;
+
+                    if (dist < RADIUS) {
+                        // Closeness: 1 right at the cursor, 0 at the edge of RADIUS.
+                        var t = 1 - dist / RADIUS;
+                        // Smoothstep gives a soft, field-like falloff instead of a
+                        // hard linear edge -> feels more like displacing water.
+                        var falloff = t * t * (3 - 2 * t);
+                        var push = falloff * it.strength;
+
+                        // Normalise the vector (divide by length) to get a pure
+                        // direction, then push the char AWAY from the cursor.
+                        var inv = dist > 0.001 ? 1 / dist : 0;
+                        targetX = vx * inv * push;
+                        targetY = vy * inv * push;
+                    }
+
+                    // Micro-optimisation: if this char is already home and isn't
+                    // being pushed, skip the DOM write entirely (less work when idle).
+                    if (targetX === 0 && targetY === 0 &&
+                        Math.abs(it.dx) < 0.05 && Math.abs(it.dy) < 0.05) {
+                        if (it.dx !== 0 || it.dy !== 0) {
+                            it.dx = 0; it.dy = 0;
+                            it.el.style.transform = "rotate(" + it.rotation + "deg)";
+                        }
+                        continue;
+                    }
+
+                    // LERP (linear interpolation): move a fraction of the way toward
+                    // the target each frame. This is what makes both the push AND the
+                    // return glide smoothly instead of snapping.
+                    it.dx += (targetX - it.dx) * EASE;
+                    it.dy += (targetY - it.dy) * EASE;
+
+                    // transform-only movement = GPU-friendly, no layout reflow.
+                    it.el.style.transform =
+                        "translate(" + it.dx + "px," + it.dy + "px) rotate(" + it.rotation + "deg)";
+                }
+
+                requestAnimationFrame(tick);
+            }
+
+            requestAnimationFrame(tick);
+        })();
+    </script>
+</body>
+</html>

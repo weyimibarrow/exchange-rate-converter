@@ -28,6 +28,19 @@ Type the following into your terminal:
 
 python main.py
 
+## Web version (Flask)
+
+There is now a simple web frontend that reuses the exact same conversion
+logic from `main.py`. To run it locally:
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Then open http://127.0.0.1:5000/ in your browser, pick your currencies,
+enter an amount, and click **Convert**.
+
 ## Learning Log
 Throughout building this project, I've been able to learn several important Python and programming concepts, including:
 1. Error & exception handling (try/except, error logic)
