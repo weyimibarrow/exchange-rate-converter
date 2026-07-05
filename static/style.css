@@ -98,12 +98,23 @@ body {
 
 /* ---- 4. Typography inside the card ------------------------------------ */
 
+/* The title is now an inline SVG whose text is bent along an arc.
+   We size the SVG here and style the text element it contains. */
 .title {
-    margin: 0;
-    font-size: 3rem;
-    font-weight: 700;
-    font-style: italic;    /* the title is italic, per the design */
-    color: #fff;
+    display: block;
+    width: 100%;
+    max-width: 340px;
+    height: auto;
+    margin: 0 auto 4px;
+    overflow: visible;     /* let the tall italic letters show fully */
+}
+
+.title text {
+    fill: #fff;                                    /* white text */
+    font-family: "IBM Plex Sans", Arial, sans-serif;
+    font-style: italic;                            /* italic, per the design */
+    font-weight: 700;                              /* bold */
+    font-size: 54px;                               /* large (in SVG user units) */
     letter-spacing: 0.5px;
 }
 

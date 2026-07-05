@@ -23,7 +23,24 @@
     <div id="bg" class="bg-layer" aria-hidden="true"></div>
 
     <main class="card">
-        <h1 class="title">Convrrt</h1>
+        <!-- Curved title: the word is bent along an invisible arc using SVG <textPath>. -->
+        <svg class="title" viewBox="0 0 400 120" role="img" aria-label="Convrrt">
+            <defs>
+                <!-- The invisible line the text sits on. It is a shallow arc:
+                       M 30,100   -> start at the lower-left  (x=30,  y=100)
+                       Q 200,20   -> ONE control point high in the middle
+                                     (x=200, y=20) which "pulls" the line upward there
+                         370,100  -> end at the lower-right (x=370, y=100, same height as start)
+                     Q draws a quadratic curve: it bows toward the control point,
+                     so a control point near the top gives a gentle rainbow/smile arc.
+                     (Move the control point's y DOWN, e.g. Q 200,110, to flip it into a frown.) -->
+                <path id="titleArc" d="M 30,100 Q 200,20 370,100" fill="transparent" />
+            </defs>
+            <text text-anchor="middle">
+                <!-- startOffset 50% + text-anchor="middle" centre the word on the arc. -->
+                <textPath href="#titleArc" startOffset="50%">Convrrt</textPath>
+            </text>
+        </svg>
         <p class="tagline">Convert money between 40+ currencies from across the world!</p>
 
         <form method="post" action="/">
@@ -67,7 +84,7 @@
         {% endif %}
     </main>
 
-    <!-- Build the scattered background.
+    <!-- Build the scattered background AND make it drift with the mouse.
          This is purely decorative, so it lives here in a tiny script rather
          than being hand-typed as dozens of HTML tags. It does NOT touch the
          form or any backend logic. -->
@@ -75,28 +92,80 @@
         (function () {
             // The pool of characters we scatter: digits 0-9 plus currency symbols.
             var chars = "0123456789".split("")
-                .concat(["£", "$", "€", "₦", "₩", "₹", "¥", "¢", "₽", "₺", "฿", "₫"]);
+                .concat(["£", "$", "€", "₦", "₩", "₹", "¥", "¢", "฿", "₽", "₺", "₫"]);
 
             var layer = document.getElementById("bg");
-            var count = 70; // how many characters to sprinkle across the screen
+            var count = 180; // ~2.5x denser than before, so fewer empty gaps
+
+            // We keep a list of every character we create, together with its
+            // own rotation and "depth". The parallax loop below uses this list
+            // to move each character individually.
+            var items = [];
 
             for (var i = 0; i < count; i++) {
                 var span = document.createElement("span");
                 span.className = "bg-char";
-                // Pick a random character from the pool.
+                // Pick a random character from the pool (duplicates are fine).
                 span.textContent = chars[Math.floor(Math.random() * chars.length)];
 
                 // Random position anywhere in the viewport.
                 span.style.left = (Math.random() * 100) + "vw";
                 span.style.top = (Math.random() * 100) + "vh";
 
-                // Random size (30px–120px) and rotation (-45deg to +45deg)
-                // so the layout looks hand-scattered and overlaps a little.
+                // Random size (30px–120px) for the scattered, overlapping look.
                 span.style.fontSize = (30 + Math.random() * 90) + "px";
-                span.style.transform = "rotate(" + (Math.random() * 90 - 45) + "deg)";
+
+                // Each char gets its own rotation and depth:
+                //  - rotation: fixed tilt, -45deg .. +45deg
+                //  - depth: how strongly it reacts to the mouse (0.2 = far/slow,
+                //    1.5 = near/fast). Different depths make the layer feel 3D.
+                var rotation = Math.random() * 90 - 45;
+                var depth = 0.2 + Math.random() * 1.3;
+
+                // Starting transform: rotation only, no shift yet.
+                span.style.transform = "rotate(" + rotation + "deg)";
 
                 layer.appendChild(span);
+                items.push({ el: span, rotation: rotation, depth: depth });
             }
+
+            // ---- Parallax: gently shift the characters as the mouse moves ----
+
+            var MAX_SHIFT = 25;            // px a "closest" (depth 1) char can drift
+            var targetX = 0, targetY = 0;  // how far things should move right now
+            var frameQueued = false;       // is a redraw already scheduled?
+
+            // Redraw step: runs once per animation frame. It walks the list and
+            // sets each char's transform to "translate(...) rotate(...)". We must
+            // re-add the rotation every time, because setting transform replaces
+            // it completely.
+            function applyParallax() {
+                frameQueued = false;
+                for (var j = 0; j < items.length; j++) {
+                    var it = items[j];
+                    var dx = targetX * it.depth;   // deeper chars move less/more
+                    var dy = targetY * it.depth;
+                    it.el.style.transform =
+                        "translate(" + dx + "px," + dy + "px) rotate(" + it.rotation + "deg)";
+                }
+            }
+
+            window.addEventListener("mousemove", function (event) {
+                // Turn the mouse position into a value roughly -0.5 .. 0.5 measured
+                // from the centre of the screen, then scale it by MAX_SHIFT.
+                var fracX = event.clientX / window.innerWidth - 0.5;
+                var fracY = event.clientY / window.innerHeight - 0.5;
+                targetX = fracX * MAX_SHIFT;
+                targetY = fracY * MAX_SHIFT;
+
+                // Throttle with requestAnimationFrame: mousemove can fire dozens
+                // of times per second, but we only ever schedule ONE redraw per
+                // frame (~60fps). This keeps the animation smooth and lag-free.
+                if (!frameQueued) {
+                    frameQueued = true;
+                    requestAnimationFrame(applyParallax);
+                }
+            });
         })();
     </script>
 </body>
