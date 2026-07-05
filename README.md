@@ -41,6 +41,26 @@ python app.py
 Then open http://127.0.0.1:5000/ in your browser, pick your currencies,
 enter an amount, and click **Convert**.
 
+For local debugging (auto-reload + detailed errors), run instead:
+
+```bash
+FLASK_DEBUG=1 python app.py
+```
+
+## Deploy (Render)
+
+The app is ready to deploy for free on [Render](https://render.com) using the
+included `render.yaml` blueprint:
+
+1. Push this repo to GitHub (already done).
+2. On Render, click **New +** → **Blueprint** and select this repository.
+3. Render reads `render.yaml`, installs the requirements, and starts the app
+   with `gunicorn app:app`. Click **Apply**.
+4. When the build finishes you get a public URL (e.g. `https://convrrt.onrender.com`).
+
+Note: the free tier sleeps after ~15 minutes of inactivity, so the first visit
+after a while may take ~30–50 seconds to wake up, then it's fast.
+
 ## Learning Log
 Throughout building this project, I've been able to learn several important Python and programming concepts, including:
 1. Error & exception handling (try/except, error logic)

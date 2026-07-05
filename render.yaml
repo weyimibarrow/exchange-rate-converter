@@ -1,0 +1,20 @@
+# Render deployment config ("Blueprint").
+# When you connect this repo on render.com, Render reads this file and sets up
+# the service automatically — no manual field-filling needed.
+services:
+  - type: web              # a public web service (has a URL)
+    name: convrrt          # your service name -> convrrt.onrender.com (if free)
+    runtime: python
+    plan: free             # free tier (note: it sleeps after ~15 min idle)
+    # Install dependencies:
+    buildCommand: "pip install -r requirements.txt"
+    # Start the app with gunicorn. Render provides the port in $PORT; we bind to
+    # 0.0.0.0 so the service is reachable. "app:app" = the `app` object in app.py.
+    startCommand: "gunicorn app:app --bind 0.0.0.0:$PORT"
+    envVars:
+      # Pin the Python version so builds are reproducible.
+      - key: PYTHON_VERSION
+        value: "3.12.3"
+      # Debug stays OFF in production (our app reads this; unset/0 = off).
+      - key: FLASK_DEBUG
+        value: "0"
